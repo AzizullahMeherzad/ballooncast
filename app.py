@@ -11,7 +11,7 @@ from astral.sun import sun
 from reportlab.platypus import SimpleDocTemplate, Table
 import io
 
-st.title("🎈 Balloon Uçuş Tahmini")
+st.title("🎈 Balon Uçuş Tahmin Sistemi")
 
 # -------------------------
 # LOAD MODEL
@@ -157,15 +157,15 @@ def predict_month_rf(year,month):
             continue
 
         if prob < 0.3:
-            risk = "Riskli"
+            risk = "High Risk"
         elif prob < 0.6:
-            risk = "Orta Risk"
+            risk = "Medium Risk"
         else:
-            risk = "Güvenli"
+            risk = "Safe"
 
         results.append({
             "date":d.date(),
-            "Probability%":round(prob*100,1),
+            "probability_%":round(prob*100,1),
             "risk_level":risk
         })
 
@@ -180,7 +180,7 @@ def show_gauge(prob):
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=prob*100,
-        title={'text':"Uçuş İhtimali"},
+        title={'text':"Flight Probability"},
         gauge={
             'axis':{'range':[0,100]},
             'steps':[
@@ -218,8 +218,8 @@ def create_pdf(df):
 # -------------------------
 
 menu = st.sidebar.selectbox(
-"Menu",
-["Günlük Tahmin","Aylık Tahmin","Model Metrics"]
+"Menü",
+["Günlük Tahmin","Aylık Tahmin","Model Performansı"]
 )
 
 # -------------------------
@@ -230,28 +230,28 @@ if menu == "Günlük Tahmin":
 
     date = st.date_input("Tarih Seç")
 
-    if st.button("Tahmin"):
+    if st.button("Tahmin Yap"):
 
         prob = predict_date_rf(pd.to_datetime(date))
 
         if prob is None:
 
-            st.error("Hava Verisi Yok")
+            st.error("Weather data unavailable")
 
         else:
 
-            st.subheader(f"Uçuş İhtimali: {round(prob*100,1)}%")
+            st.subheader(f"Uçuş Olasılığı: {round(prob*100,1)}%")
 
             fig = show_gauge(prob)
 
             st.plotly_chart(fig)
 
             if prob >= 0.6:
-                st.success("Güvenli")
+                st.success("🟢 Uçuş İçin Güvenli")
             elif prob >= 0.4:
-                st.warning("Orta Riskli")
+                st.warning("🟡 Orta Risk")
             else:
-                st.error("Riskli")
+                st.error("🔴 Yüksek Risk")
 
 # -------------------------
 # MONTH UI
@@ -259,30 +259,19 @@ if menu == "Günlük Tahmin":
 
 elif menu == "Aylık Tahmin":
 
-    year = st.number_input("Yıl",value=2026)
-    month = st.number_input("Ay",min_value=1,max_value=12,value=3)
+    year = st.number_input("Year",value=2026)
+    month = st.number_input("Month",min_value=1,max_value=12,value=3)
 
-    if st.button("Tahmin"):
+    if st.button("Tahmin Et"):
 
         df = predict_month_rf(year,month)
 
         st.dataframe(df)
-        import plotly.express as px
-
-        fig = px.line(
-            df,
-            x="date",
-            y="Probability_%",
-            markers=True,
-            title="Aylık Uçuş Tahmini"
-        )
-
-        st.plotly_chart(fig)
 
         pdf = create_pdf(df)
 
         st.download_button(
-        label="Download PDF",
+        label="PDF İndir",
         data=pdf,
         file_name="monthly_prediction.pdf",
         mime="application/pdf"
@@ -292,7 +281,7 @@ elif menu == "Aylık Tahmin":
 # METRICS
 # -------------------------
 
-elif menu == "Model Metrics":
+elif menu == "Model Performansı":
 
     st.metric("ROC-AUC","0.916")
     st.metric("PR-AUC","0.80")
