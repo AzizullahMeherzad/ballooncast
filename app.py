@@ -11,6 +11,22 @@ from astral.sun import sun
 from reportlab.platypus import SimpleDocTemplate, Table
 import io
 
+import streamlit as st
+
+PASSWORD = st.secrets["APP_PASSWORD"]
+
+def check_password():
+    password = st.text_input("Enter password", type="password")
+    if password == PASSWORD:
+        return True
+    elif password != "":
+        st.error("Wrong password")
+    return False
+
+if not check_password():
+    st.stop()
+
+
 st.title("🎈 Balon Uçuş Tahmin Sistemi")
 
 # -------------------------
@@ -290,4 +306,5 @@ elif menu == "Model Performansı":
     st.metric("Forward Accuracy","0.88")
 
     st.write("Model Version: 1.0")
+
 
