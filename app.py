@@ -262,7 +262,7 @@ elif menu == "Aylık Tahmin":
     year = st.number_input("Year",value=2026)
     month = st.number_input("Month",min_value=1,max_value=12,value=3)
 
-    if st.button("Tahmin Et"):
+    if st.button("Aylık Tahmin"):
 
         df = predict_month_rf(year,month)
 
@@ -290,3 +290,4 @@ elif menu == "Model Performansı":
     st.metric("Forward Accuracy","0.88")
 
     st.write("Model Version: 1.0")
+
