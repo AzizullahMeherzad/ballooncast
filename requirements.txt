@@ -3,6 +3,6 @@ pandas
 numpy
 scikit-learn
 requests
-matplotlib
 astral
 plotly
+reportlab
